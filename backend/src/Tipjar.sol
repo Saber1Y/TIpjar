@@ -1,18 +1,37 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity 0.8.17;
 
-contract Tipjar {
-    uint256 public Owner;
+contract TipJar {
+    address public owner;
 
-    error AmountLessThanZero();
-    error NoRecipentAddress();
+    error NoRecipientAddress();
+    error NoFundsToWithdraw();
 
-    function SendTip(address _recipient) external payable {
-        if (msg.value < 0) {
-            revert AmountLessThanZero();
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the contract owner");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender; // Set the contract deployer as the owner
+    }
+
+    function sendTip(address _recipient) external payable {
+        if (_recipient == address(0)) {
+            revert NoRecipientAddress();
         }
-        if (address _recipient == address[0]) {
-            revert NoRecipentAddress();
+
+        (bool success, ) = payable(_recipient).call{value: msg.value}("");
+        require(success, "Transaction failed");
+    }
+
+    function withdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+        if (balance == 0) {
+            revert NoFundsToWithdraw();
         }
+
+        (bool sent, ) = payable(msg.sender).call{value: balance}("");
+        require(sent, "Failed to send Ether");
     }
 }
