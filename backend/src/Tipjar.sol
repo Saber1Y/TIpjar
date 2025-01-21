@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
 import "openzeppelin-contracts/access/Ownable.sol";
@@ -21,21 +21,27 @@ contract TipJar is Ownable {
     }
 
     function deposit() external payable {
+        require(msg.value > 0, "Deposit amount must be greater than zero");
         emit Payment(msg.sender, msg.value);
     }
 
     function withdraw() external onlyOwner {
-        uint256 amount = address(this).balance;
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No ETH to withdraw");
 
-        (bool sent, ) = (msg.sender).call{value: amount}("");
-        require(sent, "Failed to send Ether");
+        (bool sent, ) = msg.sender.call{value: balance}("");
+        require(sent, "Failed to send ETH");
 
-        emit Withdraw(msg.sender, amount);
+        emit Withdraw(msg.sender, balance);
     }
 
     function transferEth(address _to, uint256 _amount) external onlyOwner {
+        require(_amount > 0, "Transfer amount must be greater than zero");
+        require(_amount <= address(this).balance, "Insufficient ETH balance");
+
         (bool sent, ) = _to.call{value: _amount}("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Failed to send ETH");
+
         emit Withdraw(_to, _amount);
     }
 
@@ -44,7 +50,22 @@ contract TipJar is Ownable {
         address _to,
         uint256 _amount
     ) external onlyOwner {
+        require(_amount > 0, "Transfer amount must be greater than zero");
+        require(
+            IERC20(_token).balanceOf(address(this)) >= _amount,
+            "Insufficient token balance"
+        );
+
         IERC20(_token).safeTransfer(_to, _amount);
+
         emit WithdrawERC20(_to, _token, _amount);
+    }
+
+    function getBalance() external view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function getTokenBalance(address _token) external view returns (uint256) {
+        return IERC20(_token).balanceOf(address(this));
     }
 }
