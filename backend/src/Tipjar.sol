@@ -8,6 +8,8 @@ import "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 contract TipJar is Ownable {
     using SafeERC20 for IERC20;
 
+    constructor(address initialOwner) Ownable(initialOwner) {}
+
     event Payment(address indexed sender, uint256 amount);
     event Withdraw(address indexed recipient, uint256 amount);
     event WithdrawERC20(
