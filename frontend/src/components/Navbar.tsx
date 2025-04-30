@@ -1,8 +1,8 @@
 "use client";
-import Link from 'next/link';
-import { useState } from 'react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import Link from "next/link";
+import { useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { FaBars, FaTimes } from "react-icons/fa";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,7 +10,7 @@ export default function Navbar() {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <nav className="bg-white border-b shadow-md">
+    <nav className="bg-white border-b border-3 border-b-black shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
@@ -26,9 +26,11 @@ export default function Navbar() {
               <span className="text-gray-700 hover:text-blue-600">Home</span>
             </Link>
             <Link href="/dashboard">
-              <span className="text-gray-700 hover:text-blue-600">Dashboard</span>
+              <span className="text-gray-700 hover:text-blue-600">
+                Dashboard
+              </span>
             </Link>
-            {/* <ConnectButton /> */}
+            <ConnectButton />
           </div>
 
           {/* Mobile Menu Button */}
@@ -50,7 +52,7 @@ export default function Navbar() {
             <a className="block text-gray-700 hover:text-blue-600">Dashboard</a>
           </Link>
           <div>
-            {/* <ConnectButton /> */}
+            <ConnectButton />
           </div>
         </div>
       )}
