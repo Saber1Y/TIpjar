@@ -1,18 +1,40 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
-import { useRouter } from "next/navigation";
 
-const LandingPage: React.FC = () => {
+//wagmi hooks
+import { useWriteContract } from "wagmi";
+import { writeContract } from "viem/actions";
+
+const LandingPage: React.FC = ({ ContractAddress, abi }) => {
   const { isConnected } = useAccount();
-  const router = useRouter();
+  const [txHash, setTxhash] = useState<string | null>(null);
 
-  const handleCreateTipJar = () => {
-    if (isConnected) {
-      router.push("/create");
-    }
+  const {
+    writeContractAsync: createTipJarWrite,
+    isLoading: creatingTipjar,
+    error: creatError,
+  } = useWriteContract();
+
+  const handleCreateTipJar = async (e): any => {
+    e.preventDefault();
+
+    await createTipJarWrite({
+        ContractAddress: ContractAddress,
+        abi: abi,
+        functionName: "createTipJar",
+        
+    })
+
+    // const tx = await writeAsync();
+    // const receipt = await tx.wait();
+    // const event = receipt.events?.find(e => e.event === "TipJarCreated");
+    // const newAddress = event?.args?.tipJar;
+    // setTxHash(newAddress);
+
+    console.log(createTipJarWrite, "TipJar created");
   };
 
   return (
@@ -42,10 +64,11 @@ const LandingPage: React.FC = () => {
               />
             ) : (
               <button
+                isDisabled={isLoading}
                 onClick={handleCreateTipJar}
                 className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-xl shadow-purple-200"
               >
-                Design Your TipJar
+                {isLoading ? "Loading..." : "Design Your TipJar"}
                 <span className="ml-3 opacity-70 group-hover:opacity-100 transition-opacity">
                   ✨
                 </span>

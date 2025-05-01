@@ -11,6 +11,7 @@ import LandingPage from "@/components/LandingPage";
 const queryClient = new QueryClient();
 
 export default function Home() {
+  
   const abi = TipjarFactory.abi;
   const ContractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
@@ -20,7 +21,7 @@ export default function Home() {
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
             <Navbar />
-            <LandingPage />
+            <LandingPage ContractAddress={ContractAddress} abi={abi} />
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
