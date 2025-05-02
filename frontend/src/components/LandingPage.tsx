@@ -19,15 +19,15 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   //   const [txHash, setTxhash] = useState<string | null>(null);
 
   //   const [tips, setTips] = useState<any[]>([]);
-  const [isOpen, setIsOpen] = useState<boolean>();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    slug: "",
+    // slug: "",
     avatarUrl: "",
     tags: "",
   });
@@ -62,7 +62,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
     error: createError,
   } = useWriteContract();
 
-  const handleCreateTipJar = async (e): Promise<any> => {
+  const handleCreateTipJar = async (e: React.FormEvent) => {
     e.preventDefault();
 
     await createTipJarWrite({
@@ -86,6 +86,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
 
   return (
     <div className="min-h-screen  bg-white">
+      <ToastContainer />
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-24 text-center">
         <div className="max-w-4xl mx-auto space-y-12">
@@ -102,28 +103,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
             simple, secure, and rewarding for both you and your supporters.
           </p>
 
-          {/* <div className="mt-16">
-            {!isConnected ? (
-              <ConnectButton
-                label="Start Creating →"
-                showBalance={false}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-transform"
-              />
-            ) : (
-              <button
-                disabled={creatingTipjarStatus === "pending"}
-                onClick={handleCreateTipJar}
-                className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-xl shadow-purple-200"
-              >
-                {creatingTipjarStatus === "pending"
-                  ? "Loading..."
-                  : "Design Your TipJar"}
-                <span className="ml-3 opacity-70 group-hover:opacity-100 transition-opacity">
-                  ✨
-                </span>
-              </button>
-            )}
-          </div> */}
           <button
             className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-xl shadow-purple-200"
             onClick={() => setIsOpen(true)}
@@ -135,8 +114,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
         </div>
       </section>
 
-
-    //modals 
+      {/* modals */}
 
       <Dialog
         open={isOpen}
@@ -147,7 +125,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl space-y-4">
             <div className="flex justify-between items-center mb-2">
-              <Dialog.Title className="text-xl font-bold text-gray-800">
+              <Dialog.Title className="text-xl font-bold text-gray-800 mb-5">
                 Customize Your TipJar
               </Dialog.Title>
               <button
@@ -157,53 +135,90 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 <X />
               </button>
             </div>
+            <label className="block mb-2">
+              <span className="text-sm font-medium text-purple-600">
+                Name *
+              </span>
+              <input
+                name="name"
+                onChange={handleChangeFormData}
+                value={formData.name}
+                required
+                className="w-full p-2 border rounded mt-1 text-black"
+              />
+            </label>
 
-            <input
-              name="name"
-              placeholder="@creator_name"
-              value={formData.name}
-              onChange={handleChangeFormData}
-              className="w-full border p-2 rounded-md"
-            />
+            <label className="block mb-2">
+              <span className="text-sm font-medium text-purple-600">
+                Description
+              </span>
+              <textarea
+                name="description"
+                onChange={handleChangeFormData}
+                value={formData.description}
+                rows={3}
+                className="w-full p-2 border rounded mt-1 text-black"
+              />
+            </label>
 
-            <textarea
-              name="description"
-              placeholder="Optional message (e.g. 'Buy me a coffee!')"
-              value={formData.description}
-              onChange={handleChangeFormData}
-              className="w-full border p-2 rounded-md resize-none"
-            />
+            <label className="block mb-2">
+              <span className="text-sm font-medium text-purple-600">
+                Image / Avatar URL
+              </span>
+              <input
+                name="image"
+                onChange={handleChangeFormData}
+                value={formData.image}
+                className="w-full p-2 border rounded mt-1 text-black"
+              />
+            </label>
 
-            <input
-              name="slug"
-              placeholder="Custom Slug (e.g. blocky)"
-              value={formData.slug}
-              onChange={handleChangeFormData}
-              className="w-full border p-2 rounded-md"
-            />
+            <label className="block mb-4">
+              <span className="text-sm font-medium text-purple-600">
+                Tags (comma-separated)
+              </span>
+              <input
+                name="tags"
+                onChange={handleChangeFormData}
+                value={formData.tags}
+                className="w-full p-2 border rounded mt-1 text-black"
+              />
+            </label>
 
-            <input
-              name="avatarUrl"
-              placeholder="Profile Image URL"
-              value={formData.avatarUrl}
-              onChange={handleChangeFormData}
-              className="w-full border p-2 rounded-md"
-            />
+            <label className="block mb-4">
+              <span className="text-sm font-medium text-purple-600">
+                Connected Wallet Address (Owner)
+              </span>
+              <input
+                value={address || "Connect wallet to continue"}
+                readOnly
+                disabled
+                className="w-full p-2 border rounded bg-gray-100 text-gray-600"
+              />
+            </label>
 
-            <input
-              name="tags"
-              placeholder="Tags (e.g. dev, design, music)"
-              value={formData.tags}
-              onChange={handleChangeFormData}
-              className="w-full border p-2 rounded-md"
-            />
-
-            <button
-              onClick={handleSubmit}
-              className="w-full bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700 transition"
-            >
-              Deploy TipJar
-            </button>
+            <div className="mt-5">
+              {!isConnected ? (
+                <ConnectButton
+                  label="Start Creating →"
+                  showBalance={false}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-transform"
+                />
+              ) : (
+                <button
+                  disabled={creatingTipjarStatus === "pending"}
+                  onClick={handleCreateTipJar}
+                  className="w-full bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700 transition"
+                >
+                  {creatingTipjarStatus === "pending"
+                    ? "Loading..."
+                    : "Design Your TipJar"}
+                  <span className="ml-3 opacity-70 group-hover:opacity-100 transition-opacity">
+                    ✨
+                  </span>
+                </button>
+              )}
+            </div>
           </Dialog.Panel>
         </div>
       </Dialog>
