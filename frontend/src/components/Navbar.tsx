@@ -10,7 +10,7 @@ export default function Navbar() {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <nav className="bg-white border-b border-3 border-b-black shadow-lg">
+    <nav className="bg-white border-b  shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
@@ -35,9 +35,9 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            {/* <button onClick={toggleMenu} className="text-gray-700 focus:outline-none">
+            <button onClick={toggleMenu} className="text-gray-700 focus:outline-none">
               {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-            </button> */}
+            </button>
           </div>
         </div>
       </div>

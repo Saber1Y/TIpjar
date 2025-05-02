@@ -3,37 +3,84 @@
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
+import { ToastContainer, toast } from "react-toastify";
+
+import { Dialog } from "@headlessui/react";
+import { X } from "lucide-react";
+import { nanoid } from "nanoid";
 
 //wagmi hooks
 import { useWriteContract } from "wagmi";
-import { writeContract } from "viem/actions";
+// import { writeContract } from "viem/actions";
 
-const LandingPage: React.FC = ({ ContractAddress, abi }) => {
+interface LandingPageProps {
+  ContractAddress: `0x${string}`;
+  abi: any;
+}
+
+const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
   const { isConnected } = useAccount();
-  const [txHash, setTxhash] = useState<string | null>(null);
+  //   const [txHash, setTxhash] = useState<string | null>(null);
+
+  //   const [tips, setTips] = useState<any[]>([]);
+  const [isOpen, setIsOpen] = useState<boolean>();
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    slug: "",
+    avatarUrl: "",
+    tags: "",
+  });
+
+  const handleChangeFormData = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const autoGenerateName = () => {
+    return `tipjar.eth-fan-${nanoid(4)}`;
+  };
+
+  const handleSubmit = () => {
+    const savedName = formData.name || autoGenerateName();
+
+    const newSavedData = {
+      ...formData,
+      name: savedName,
+    };
+
+    console.log("Creating TipJar with:", newSavedData);
+    // Here you would call the deploy function with `newTipJarData`
+
+    setIsOpen(false);
+  };
 
   const {
     writeContractAsync: createTipJarWrite,
-    isLoading: creatingTipjar,
-    error: creatError,
+    status: creatingTipjarStatus,
+    error: createError,
   } = useWriteContract();
 
-  const handleCreateTipJar = async (e): any => {
+  const handleCreateTipJar = async (e): Promise<any> => {
     e.preventDefault();
 
     await createTipJarWrite({
-        ContractAddress: ContractAddress,
-        abi: abi,
-        functionName: "createTipJar",
-        
-    })
+      address: ContractAddress,
+      abi: abi,
+      functionName: "createTipJar",
+      args: [],
+    });
 
-    // const tx = await writeAsync();
-    // const receipt = await tx.wait();
-    // const event = receipt.events?.find(e => e.event === "TipJarCreated");
-    // const newAddress = event?.args?.tipJar;
-    // setTxHash(newAddress);
-
+    if (createError) {
+      toast.error(`Failed to create TipJar: ${createError.message}`, {
+        position: "top-center",
+      });
+      return;
+    }
+    toast.success(`Created TIpJar Succesfully`, {
+      position: "top-center",
+    });
     console.log(createTipJarWrite, "TipJar created");
   };
 
@@ -55,28 +102,111 @@ const LandingPage: React.FC = ({ ContractAddress, abi }) => {
             simple, secure, and rewarding for both you and your supporters.
           </p>
 
-          <div className="mt-16">
+          {/* <div className="mt-16">
             {!isConnected ? (
               <ConnectButton
                 label="Start Creating →"
                 showBalance={false}
-                className="!bg-gradient-to-r !from-purple-600 !to-indigo-600 !px-8 !py-4 !rounded-xl !font-bold !text-lg hover:!scale-105 transition-transform"
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-transform"
               />
             ) : (
               <button
-                isDisabled={isLoading}
+                disabled={creatingTipjarStatus === "pending"}
                 onClick={handleCreateTipJar}
                 className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-xl shadow-purple-200"
               >
-                {isLoading ? "Loading..." : "Design Your TipJar"}
+                {creatingTipjarStatus === "pending"
+                  ? "Loading..."
+                  : "Design Your TipJar"}
                 <span className="ml-3 opacity-70 group-hover:opacity-100 transition-opacity">
                   ✨
                 </span>
               </button>
             )}
-          </div>
+          </div> */}
+          <button
+            className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-xl shadow-purple-200"
+            onClick={() => setIsOpen(true)}
+          >
+            <span className="ml-3 opacity-70 group-hover:opacity-100 transition-opacity">
+              Create TipJar
+            </span>
+          </button>
         </div>
       </section>
+
+
+    //modals 
+
+      <Dialog
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl space-y-4">
+            <div className="flex justify-between items-center mb-2">
+              <Dialog.Title className="text-xl font-bold text-gray-800">
+                Customize Your TipJar
+              </Dialog.Title>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X />
+              </button>
+            </div>
+
+            <input
+              name="name"
+              placeholder="@creator_name"
+              value={formData.name}
+              onChange={handleChangeFormData}
+              className="w-full border p-2 rounded-md"
+            />
+
+            <textarea
+              name="description"
+              placeholder="Optional message (e.g. 'Buy me a coffee!')"
+              value={formData.description}
+              onChange={handleChangeFormData}
+              className="w-full border p-2 rounded-md resize-none"
+            />
+
+            <input
+              name="slug"
+              placeholder="Custom Slug (e.g. blocky)"
+              value={formData.slug}
+              onChange={handleChangeFormData}
+              className="w-full border p-2 rounded-md"
+            />
+
+            <input
+              name="avatarUrl"
+              placeholder="Profile Image URL"
+              value={formData.avatarUrl}
+              onChange={handleChangeFormData}
+              className="w-full border p-2 rounded-md"
+            />
+
+            <input
+              name="tags"
+              placeholder="Tags (e.g. dev, design, music)"
+              value={formData.tags}
+              onChange={handleChangeFormData}
+              className="w-full border p-2 rounded-md"
+            />
+
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700 transition"
+            >
+              Deploy TipJar
+            </button>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
 
       {/* Features Grid */}
       <section className="container mx-auto px-4 py-24">
