@@ -27,7 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    // slug: "",
+    slug: "",
     avatarUrl: "",
     tags: "",
   });
@@ -43,8 +43,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
     return `tipjar.eth-fan-${nanoid(4)}`;
   };
 
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "");
+  };
+
   const handleSubmit = () => {
     const savedName = formData.name || autoGenerateName();
+    const slug = generateSlug(savedName);
 
     if (!formData.name && !formData.avatarUrl) {
       toast.error("Please fill in a name or avatar URL.");
@@ -54,20 +62,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
     const newSavedData = {
       ...formData,
       name: savedName,
+      slug,
     };
 
     setPreviewData({
       ...formData,
       name: formData.name || autoGenerateName(),
+      slug,
     });
-
-    setFormData({
-      name: "",
-      description: "",
-      avatarUrl: "",
-      tags: "",
-    });
-    setPreviewData(null);
 
     console.log("Creating TipJar with:", newSavedData);
     setIsOpen(false);
@@ -82,7 +84,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
   const handleCreateTipJar = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    
+    setFormData({
+      name: "",
+      description: "",
+      avatarUrl: "",
+      slug: "",
+      tags: "",
+    });
+    setPreviewData(null);
 
     try {
       await createTipJarWrite({
@@ -95,7 +104,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
         position: "top-center",
       });
     } catch (error) {
-      toast.error(`Failed to create TipJar: ${createError.message}`, {
+      toast.error(`Failed to create TipJar: ${error.message}`, {
         position: "top-center",
       });
     }
@@ -275,6 +284,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 </p>
                 <p className="text-sm text-gray-500">
                   <strong>Owner:</strong> {address}
+                </p>
+
+                <p className="text-sm text-gray-500">
+                  <strong>TipJar Link:</strong>{" "}
+                  <a
+                    href={`/tipjar/${previewData.slug}`}
+                    className="text-purple-600 underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {`/tipjar/${previewData.slug}`}
+                  </a>
                 </p>
               </div>
             )}
