@@ -31,6 +31,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
     avatarUrl: "",
     tags: "",
   });
+  const [previewData, setPreviewData] = useState<typeof formData | null>(null);
 
   const handleChangeFormData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -45,14 +46,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
   const handleSubmit = () => {
     const savedName = formData.name || autoGenerateName();
 
+    if (!formData.name && !formData.avatarUrl) {
+      toast.error("Please fill in a name or avatar URL.");
+      return;
+    }
+
     const newSavedData = {
       ...formData,
       name: savedName,
     };
 
-    console.log("Creating TipJar with:", newSavedData);
-    // Here you would call the deploy function with `newTipJarData`
+    setPreviewData({
+      ...formData,
+      name: formData.name || autoGenerateName(),
+    });
 
+    setFormData({
+      name: "",
+      description: "",
+      avatarUrl: "",
+      tags: "",
+    });
+    setPreviewData(null);
+
+    console.log("Creating TipJar with:", newSavedData);
     setIsOpen(false);
   };
 
@@ -65,22 +82,24 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
   const handleCreateTipJar = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await createTipJarWrite({
-      address: ContractAddress,
-      abi: abi,
-      functionName: "createTipJar",
-      args: [],
-    });
+    
 
-    if (createError) {
+    try {
+      await createTipJarWrite({
+        address: ContractAddress,
+        abi: abi,
+        functionName: "createTipJar",
+        args: [],
+      });
+      toast.success(`Created TIpJar Succesfully`, {
+        position: "top-center",
+      });
+    } catch (error) {
       toast.error(`Failed to create TipJar: ${createError.message}`, {
         position: "top-center",
       });
-      return;
     }
-    toast.success(`Created TIpJar Succesfully`, {
-      position: "top-center",
-    });
+
     console.log(createTipJarWrite, "TipJar created");
   };
 
@@ -130,7 +149,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
               </Dialog.Title>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-black hover:text-gray-600"
               >
                 <X />
               </button>
@@ -166,9 +185,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 Image / Avatar URL
               </span>
               <input
-                name="image"
+                name="avatarUrl"
                 onChange={handleChangeFormData}
-                value={formData.image}
+                value={formData.avatarUrl}
                 className="w-full p-2 border rounded mt-1 text-black"
               />
             </label>
@@ -206,8 +225,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 />
               ) : (
                 <button
-                  disabled={creatingTipjarStatus === "pending"}
-                  onClick={handleCreateTipJar}
+                  //   disabled={creatingTipjarStatus === "pending"}
+                  onClick={handleSubmit}
                   className="w-full bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700 transition"
                 >
                   {creatingTipjarStatus === "pending"
@@ -219,6 +238,46 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 </button>
               )}
             </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
+      <Dialog
+        open={previewData !== null}
+        onClose={() => setPreviewData(null)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl space-y-4">
+            <div className="flex justify-between items-center">
+              <Dialog.Title className="text-xl font-bold text-gray-800">
+                TipJar Preview
+              </Dialog.Title>
+              <button
+                onClick={() => setPreviewData(null)}
+                className="text-black hover:text-gray-600"
+              >
+                <X />
+              </button>
+            </div>
+            {previewData && (
+              <div className="space-y-4">
+                <img
+                  src={previewData.avatarUrl || "/default-avatar.png"}
+                  alt="Avatar"
+                  className="w-full rounded-md object-cover"
+                />
+                <h3 className="text-lg font-semibold">{previewData.name}</h3>
+                <p className="text-gray-600">{previewData.description}</p>
+                <p className="text-sm text-gray-500">
+                  <strong>Tags:</strong> {previewData.tags}
+                </p>
+                <p className="text-sm text-gray-500">
+                  <strong>Owner:</strong> {address}
+                </p>
+              </div>
+            )}
           </Dialog.Panel>
         </div>
       </Dialog>
@@ -280,7 +339,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 />
               ) : (
                 <button
-                  onClick={handleCreateTipJar}
+                  //   onClick={handleCreateTipJar}
                   className="px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-lg"
                 >
                   Launch Your TipJar Now
