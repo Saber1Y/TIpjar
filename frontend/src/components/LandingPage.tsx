@@ -278,7 +278,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                   className="w-full rounded-md object-cover"
                 />
                 <h3 className="text-lg font-semibold">{previewData.name}</h3>
-                <p className="text-gray-600">{previewData.description}</p>
+                <p className="text-black">{previewData.description}</p>
                 <p className="text-sm text-gray-500">
                   <strong>Tags:</strong> {previewData.tags}
                 </p>
@@ -311,7 +311,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Zero Setup Fees
             </h3>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-black leading-relaxed">
               Launch your TipJar completely free. We only charge a small 2% fee
               when you receive tips.
             </p>
@@ -322,7 +322,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Instant Withdrawals
             </h3>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-black leading-relaxed">
               Access your funds immediately with direct blockchain transfers to
               your wallet.
             </p>
@@ -333,7 +333,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Custom Branding
             </h3>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-black leading-relaxed">
               Personalize colors, messages, and layout to match your unique
               style.
             </p>
@@ -376,19 +376,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div className="p-6">
             <div className="text-3xl font-bold text-purple-600 mb-2">2.1M+</div>
-            <div className="text-gray-600">Tips Received</div>
+            <div className="text-black">Tips Received</div>
           </div>
           <div className="p-6">
             <div className="text-3xl font-bold text-indigo-600 mb-2">$15M+</div>
-            <div className="text-gray-600">Total Volume</div>
+            <div className="text-black">Total Volume</div>
           </div>
           <div className="p-6">
             <div className="text-3xl font-bold text-pink-600 mb-2">98%</div>
-            <div className="text-gray-600">Happy Creators</div>
+            <div className="text-black">Happy Creators</div>
           </div>
           <div className="p-6">
             <div className="text-3xl font-bold text-blue-600 mb-2">24/7</div>
-            <div className="text-gray-600">Support</div>
+            <div className="text-black">Support</div>
           </div>
         </div>
       </section>
