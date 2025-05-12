@@ -10,10 +10,11 @@ contract TipJarFactory {
 
     mapping(string => address) public slugsToTipJar;
     mapping(address => string) public tipJarToSlug;
+    mapping(string => string) public slugToCID;
 
     address[] public allTipJars;
 
-    function createTipJar(string memory slug) external returns (address) {
+    function createTipJar(string memory slug, string memory cid) external returns (address) {
         if (slugsToTipJar[slug] != address(0)) {
             revert SlugAlreadyExists(slug);
         }
@@ -24,6 +25,7 @@ contract TipJarFactory {
         allTipJars.push(tipJarAddress);
         slugsToTipJar[slug] = tipJarAddress;
         tipJarToSlug[tipJarAddress] = slug;
+        slugToCID[slug] = cid;
 
         emit TipJarCreated(msg.sender, tipJarAddress, slug);
         return tipJarAddress;
@@ -33,9 +35,11 @@ contract TipJarFactory {
         return allTipJars;
     }
 
-    function getTipJarBySlug(
-        string memory slug
-    ) external view returns (address) {
+    function getTipJarBySlug(string memory slug) external view returns (address) {
         return slugsToTipJar[slug];
+    }
+
+    function getCIDByAddress(address tipJar) external view returns (string memory) {
+        return slugToCID[tipJarToSlug[tipJar]];
     }
 }

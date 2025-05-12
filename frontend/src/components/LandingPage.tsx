@@ -89,7 +89,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
       description: "",
       avatarUrl: "",
       slug: "",
-      tags: "",
+    //   tags: "",
     });
     setPreviewData(null);
 
@@ -279,9 +279,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 />
                 <h3 className="text-lg font-semibold">{previewData.name}</h3>
                 <p className="text-black">{previewData.description}</p>
-                <p className="text-sm text-gray-500">
+                {/* <p className="text-sm text-gray-500">
                   <strong>Tags:</strong> {previewData.tags}
-                </p>
+                </p> */}
                 <p className="text-sm text-gray-500">
                   <strong>Owner:</strong> {address}
                 </p>

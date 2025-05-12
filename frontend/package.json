@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.2",
+    "@pinata/sdk": "^2.1.0",
     "@rainbow-me/rainbowkit": "^2.2.4",
     "@tanstack/react-query": "^5.74.7",
+    "axios": "^1.9.0",
     "lucide-react": "^0.507.0",
     "nanoid": "^5.1.5",
     "next": "15.3.1",
