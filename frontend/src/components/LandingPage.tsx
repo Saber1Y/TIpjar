@@ -29,7 +29,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
     description: "",
     slug: "",
     avatarUrl: "",
-    tags: "",
+    // tags: "",
   });
   const [previewData, setPreviewData] = useState<typeof formData | null>(null);
 
@@ -201,17 +201,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
               />
             </label>
 
-            <label className="block mb-4">
-              <span className="text-sm font-medium text-purple-600">
-                Tags (comma-separated)
-              </span>
-              <input
-                name="tags"
-                onChange={handleChangeFormData}
-                value={formData.tags}
-                className="w-full p-2 border rounded mt-1 text-black"
-              />
-            </label>
+      
 
             <label className="block mb-4">
               <span className="text-sm font-medium text-purple-600">
