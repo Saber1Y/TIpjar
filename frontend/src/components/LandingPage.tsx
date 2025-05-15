@@ -4,14 +4,14 @@ import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { ToastContainer, toast } from "react-toastify";
-
 import { Dialog } from "@headlessui/react";
 import { X } from "lucide-react";
 import { nanoid } from "nanoid";
 
-//wagmi hooks
+import { UploadToIPFS } from "../../utils/UploadToIPFS";
+
+// wagmi hooks
 import { useWriteContract } from "wagmi";
-// import { writeContract } from "viem/actions";
 
 interface LandingPageProps {
   ContractAddress: `0x${string}`;
@@ -20,18 +20,16 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
   const { address, isConnected } = useAccount();
-  //   const [txHash, setTxhash] = useState<string | null>(null);
-
-  //   const [tips, setTips] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     slug: "",
     avatarUrl: "",
-    // tags: "",
   });
   const [previewData, setPreviewData] = useState<typeof formData | null>(null);
+  const [cid, setCid] = useState<string | null>(null);
+  const [isCreatingTipJar, setIsCreatingTipJar] = useState<boolean>(false);
 
   const handleChangeFormData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -50,70 +48,103 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
       .replace(/[^a-z0-9\-]/g, "");
   };
 
-  const handleSubmit = () => {
-    const savedName = formData.name || autoGenerateName();
-    const slug = generateSlug(savedName);
-
-    if (!formData.name && !formData.avatarUrl) {
-      toast.error("Please fill in a name or avatar URL.");
-      return;
-    }
-
-    const newSavedData = {
-      ...formData,
-      name: savedName,
-      slug,
-    };
-
-    setPreviewData({
-      ...formData,
-      name: formData.name || autoGenerateName(),
-      slug,
-    });
-
-    console.log("Creating TipJar with:", newSavedData);
-    setIsOpen(false);
-  };
-
   const {
     writeContractAsync: createTipJarWrite,
     status: creatingTipjarStatus,
     error: createError,
   } = useWriteContract();
 
+  const handleSubmit = async () => {
+    if (!isConnected) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    const savedName = formData.name || autoGenerateName();
+    const slug = formData.slug || generateSlug(savedName);
+
+    if (!savedName) {
+      toast.error("Please fill in a name for your TipJar.");
+      return;
+    }
+
+    const tipJarData = {
+      ...formData,
+      name: savedName,
+      slug,
+      owner: address,
+      createdAt: new Date().toISOString(),
+    };
+
+    setPreviewData({
+      ...formData,
+      name: savedName,
+      slug,
+    });
+
+    try {
+      // Upload to IPFS first
+      const ipfsHash = await UploadToIPFS(tipJarData);
+      setCid(ipfsHash);
+      console.log("✅ Uploaded to IPFS with CID:", ipfsHash);
+      toast.success("Uploaded to IPFS!");
+
+      // Now show preview with the option to create on-chain
+    } catch (error) {
+      console.error("❌ Failed to upload to IPFS:", error);
+      toast.error("Upload to IPFS failed.");
+      setPreviewData(null);
+    }
+
+    setIsOpen(false);
+  };
+
   const handleCreateTipJar = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setFormData({
-      name: "",
-      description: "",
-      avatarUrl: "",
-      slug: "",
-    //   tags: "",
-    });
-    setPreviewData(null);
+    if (!cid || !previewData) {
+      toast.error("Missing data for creating TipJar");
+      return;
+    }
+
+    setIsCreatingTipJar(true);
 
     try {
-      await createTipJarWrite({
+      const tx = await createTipJarWrite({
         address: ContractAddress,
         abi: abi,
         functionName: "createTipJar",
-        args: [],
+        args: [previewData.slug, cid],
       });
-      toast.success(`Created TIpJar Succesfully`, {
-        position: "top-center",
+
+      toast.success(
+        `TipJar created successfully! Transaction: ${tx.slice(0, 10)}...`,
+        {
+          position: "top-center",
+        }
+      );
+
+      // Reset form after successful creation
+      setFormData({
+        name: "",
+        description: "",
+        avatarUrl: "",
+        slug: "",
       });
+      setPreviewData(null);
+      setCid(null);
     } catch (error) {
+      console.error("Error creating TipJar:", error);
       toast.error(`Failed to create TipJar: ${error.message}`, {
         position: "top-center",
       });
+    } finally {
+      setIsCreatingTipJar(false);
     }
-
-    console.log(createTipJarWrite, "TipJar created");
   };
 
   return (
-    <div className="min-h-screen  bg-white">
+    <div className="min-h-screen bg-white">
       <ToastContainer />
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-24 text-center">
@@ -142,8 +173,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
         </div>
       </section>
 
-      {/* modals */}
-
+      {/* Form Modal */}
       <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
@@ -173,6 +203,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 value={formData.name}
                 required
                 className="w-full p-2 border rounded mt-1 text-black"
+                placeholder="Your TipJar name"
+              />
+            </label>
+
+            <label className="block mb-2">
+              <span className="text-sm font-medium text-purple-600">
+                Custom URL Slug (optional)
+              </span>
+              <input
+                name="slug"
+                onChange={handleChangeFormData}
+                value={formData.slug}
+                className="w-full p-2 border rounded mt-1 text-black"
+                placeholder="custom-name (will generate from name if empty)"
               />
             </label>
 
@@ -186,6 +230,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 value={formData.description}
                 rows={3}
                 className="w-full p-2 border rounded mt-1 text-black"
+                placeholder="Tell supporters what you create..."
               />
             </label>
 
@@ -198,10 +243,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 onChange={handleChangeFormData}
                 value={formData.avatarUrl}
                 className="w-full p-2 border rounded mt-1 text-black"
+                placeholder="https://example.com/your-image.jpg"
               />
             </label>
-
-      
 
             <label className="block mb-4">
               <span className="text-sm font-medium text-purple-600">
@@ -224,9 +268,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 />
               ) : (
                 <button
-                  //   disabled={creatingTipjarStatus === "pending"}
+                  disabled={creatingTipjarStatus === "pending"}
                   onClick={handleSubmit}
-                  className="w-full bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700 transition"
+                  className="w-full bg-purple-600 text-white py-3 rounded-md font-semibold hover:bg-purple-700 transition"
                 >
                   {creatingTipjarStatus === "pending"
                     ? "Loading..."
@@ -241,6 +285,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
         </div>
       </Dialog>
 
+      {/* Preview Modal */}
       <Dialog
         open={previewData !== null}
         onClose={() => setPreviewData(null)}
@@ -265,28 +310,43 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 <img
                   src={previewData.avatarUrl || "/default-avatar.png"}
                   alt="Avatar"
-                  className="w-full rounded-md object-cover"
+                  className="w-24 h-24 rounded-full mx-auto object-cover"
                 />
-                <h3 className="text-lg font-semibold">{previewData.name}</h3>
-                <p className="text-black">{previewData.description}</p>
-                {/* <p className="text-sm text-gray-500">
-                  <strong>Tags:</strong> {previewData.tags}
-                </p> */}
+                <h3 className="text-lg font-semibold text-center">
+                  {previewData.name}
+                </h3>
+                <p className="text-black text-center">
+                  {previewData.description}
+                </p>
                 <p className="text-sm text-gray-500">
-                  <strong>Owner:</strong> {address}
+                  <strong>Owner:</strong>{" "}
+                  {address && `${address.slice(0, 6)}...${address.slice(-4)}`}
                 </p>
 
                 <p className="text-sm text-gray-500">
                   <strong>TipJar Link:</strong>{" "}
-                  <a
-                    href={`/tipjar/${previewData.slug}`}
-                    className="text-purple-600 underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <span className="text-purple-600">
                     {`/tipjar/${previewData.slug}`}
-                  </a>
+                  </span>
                 </p>
+
+                {cid && (
+                  <div className="text-xs text-gray-500 break-all">
+                    <strong>IPFS CID:</strong> {cid}
+                  </div>
+                )}
+
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={handleCreateTipJar}
+                    disabled={isCreatingTipJar || !cid}
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-md font-semibold hover:opacity-90 transition disabled:opacity-70"
+                  >
+                    {isCreatingTipJar
+                      ? "Creating TipJar..."
+                      : "Create TipJar On-Chain"}
+                  </button>
+                </div>
               </div>
             )}
           </Dialog.Panel>
@@ -350,7 +410,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 />
               ) : (
                 <button
-                  //   onClick={handleCreateTipJar}
+                  onClick={() => setIsOpen(true)}
                   className="px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-lg"
                 >
                   Launch Your TipJar Now

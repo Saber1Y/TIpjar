@@ -1,44 +1,138 @@
-//SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
 
-import "openzeppelin-contracts/access/Ownable.sol";
-import "openzeppelin-contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract TipJar is Ownable {
-    using SafeERC20 for IERC20;
+/**
+ * @title TipJar
+ * @dev Contract for receiving tips in ETH, with support for withdrawals
+ */
 
-    constructor(address initialOwner) Ownable(initialOwner) {}
+contract TipJar is Ownable, ReentrancyGuard {
+    // Events
+    event TipReceived(address indexed from, uint256 amount, uint256 timestamp);
+    event Withdrawn(address indexed to, uint256 amount, uint256 timestamp);
 
-    event Payment(address indexed sender, uint256 amount);
-    event Withdraw(address indexed recipient, uint256 amount);
-    event WithdrawERC20(address indexed recipient, address indexed token, uint256 amount);
+    // Tip structure
+    struct Tip {
+        address sender;
+        uint256 amount;
+        uint256 timestamp;
+    }
 
+    // State variables
+    Tip[] public tips;
+    uint256 public totalTips;
+
+    // Constructor
+    constructor(address initialOwner) Ownable(initialOwner) {
+        // Set the creator as the owner
+    }
+
+    /**
+     * @dev Fallback function to receive tips
+     */
     receive() external payable {
-        emit Payment(msg.sender, msg.value);
+        _recordTip();
     }
 
-    function deposit() external payable {
-        emit Payment(msg.sender, msg.value);
+    /**
+     * @dev Function to send a tip
+     */
+    function tip() external payable {
+        require(msg.value > 0, "Tip amount must be greater than 0");
+        _recordTip();
     }
 
-    function withdraw() external onlyOwner {
-        uint256 amount = address(this).balance;
+    /**
+     * @dev Internal function to record tips with metadata
+     */
+    function _recordTip() private {
+        // Record the tip
+        tips.push(
+            Tip({
+                sender: msg.sender,
+                amount: msg.value,
+                timestamp: block.timestamp
+            })
+        );
 
-        (bool sent,) = (msg.sender).call{value: amount}("");
-        require(sent, "Failed to send Ether");
+        // Update total tips received
+        totalTips += msg.value;
 
-        emit Withdraw(msg.sender, amount);
+        // Emit event
+        emit TipReceived(msg.sender, msg.value, block.timestamp);
     }
 
-    function transferEth(address _to, uint256 _amount) external onlyOwner {
-        (bool sent,) = _to.call{value: _amount}("");
-        require(sent, "Failed to send Ether");
-        emit Withdraw(_to, _amount);
+    /**
+     * @dev Allows the owner to withdraw funds
+     * @param amount The amount to withdraw
+     */
+    function withdraw(uint256 amount) external onlyOwner nonReentrant {
+        require(amount > 0, "Amount must be greater than 0");
+        require(amount <= address(this).balance, "Insufficient balance");
+
+        // Transfer the specified amount to the owner
+        (bool success, ) = payable(owner()).call{value: amount}("");
+        require(success, "Withdrawal failed");
+
+        // Emit withdrawal event
+        emit Withdrawn(owner(), amount, block.timestamp);
     }
 
-    function transferERC20(address _token, address _to, uint256 _amount) external onlyOwner {
-        IERC20(_token).safeTransfer(_to, _amount);
-        emit WithdrawERC20(_to, _token, _amount);
+    /**
+     * @dev Allows the owner to withdraw all funds
+     */
+    function withdrawAll() external onlyOwner nonReentrant {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
+
+        // Transfer all funds to the owner
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "Withdrawal failed");
+
+        // Emit withdrawal event
+        emit Withdrawn(owner(), balance, block.timestamp);
+    }
+
+    /**
+     * @dev Get total number of tips received
+     * @return The number of tips received
+     */
+    function getTipCount() external view returns (uint256) {
+        return tips.length;
+    }
+
+    /**
+     * @dev Get the balance of the TipJar
+     * @return The current balance in wei
+     */
+    function getBalance() external view returns (uint256) {
+        return address(this).balance;
+    }
+
+    /**
+     * @dev Get recent tips
+     * @param limit Maximum number of tips to return
+     * @return Array of recent tips
+     */
+    function getRecentTips(uint256 limit) external view returns (Tip[] memory) {
+        uint256 count = tips.length;
+
+        // If limit is greater than count, use count
+        if (limit > count) {
+            limit = count;
+        }
+
+        // Create an array to store the recent tips
+        Tip[] memory recentTips = new Tip[](limit);
+
+        // Populate the array with the most recent tips
+        for (uint256 i = 0; i < limit; i++) {
+            recentTips[i] = tips[count - 1 - i];
+        }
+
+        return recentTips;
     }
 }

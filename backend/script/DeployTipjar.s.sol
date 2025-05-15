@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 import {TipJar} from "../src/Tipjar.sol";
 import {Script} from "forge-std/Script.sol";
