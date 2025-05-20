@@ -1,8 +1,7 @@
-// utils/config.ts
-"server only"
-import { PinataSDK } from "pinata"
+// utils/pinata-config.ts (Server-only config)
+import PinataSDK from '@pinata/sdk';
 
 export const pinata = new PinataSDK({
-  pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT!,
-  pinataGateway: process.env.NEXT_PUBLIC_GATEWAY_URL!
-})
+  pinataApiKey: process.env.PINATA_API_KEY,
+  pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY
+});

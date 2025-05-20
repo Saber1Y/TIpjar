@@ -1,54 +1,52 @@
-import axios from 'axios';
+// components/UploadToIPFS.tsx (Client-side component with retry logic)
+'use client';
 
-// Enhanced version with better error handling and retry mechanism
-export const UploadToIPFS = async (data: object, retries = 2) => {
-  let attempt = 0;
-  
-  while (attempt <= retries) {
-    try {
-      // Add timestamp to data to ensure uniqueness
-      const dataWithTimestamp = {
-        ...data,
-        _timestamp: Date.now()
-      };
-      
-      console.log(`Attempting to upload to IPFS (attempt ${attempt + 1}/${retries + 1})...`);
-      
-      const res = await axios.post(
-        'https://api.pinata.cloud/pinning/pinJSONToIPFS',
-        dataWithTimestamp,
-        {
+import { useState } from 'react';
+
+export const useIPFSUpload = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const uploadToIPFS = async (data: object, maxRetries = 3) => {
+    setIsLoading(true);
+    setError(null);
+    
+    let attempt = 0;
+    
+    while (attempt <= maxRetries) {
+      try {
+        const response = await fetch('/api/pinata', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
           },
-          timeout: 30000, // 30 second timeout
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      );
-      
-      if (!res.data.IpfsHash) {
-        throw new Error('IPFS hash not returned from Pinata');
-      }
-      
-      console.log(`✅ Successfully uploaded to IPFS with hash: ${res.data.IpfsHash}`);
-      return res.data.IpfsHash;
-    } catch (err) {
-      attempt++;
-      console.error(`❌ Pinata upload error (attempt ${attempt}/${retries + 1}):`, err);
-      
-      if (attempt > retries) {
-        console.error('All retry attempts failed');
-        throw new Error(
-          err.response?.data?.error || 
-          err.message || 
-          'Upload to IPFS failed'
+
+        const result = await response.json();
+        return result.ipfsHash;
+        
+      } catch (err: any) {
+        attempt++;
+        
+        if (attempt > maxRetries) {
+          setError(err.message || 'Upload failed after retries');
+          throw err;
+        }
+        
+        // Exponential backoff
+        await new Promise(resolve => 
+          setTimeout(resolve, Math.min(1000 * 2 ** attempt, 10000))
         );
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Wait before retrying (exponential backoff)
-      const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
-      console.log(`Retrying in ${delay/1000} seconds...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
     }
-  }
+  };
+
+  return { uploadToIPFS, isLoading, error };
 };

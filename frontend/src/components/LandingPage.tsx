@@ -8,7 +8,8 @@ import { Dialog } from "@headlessui/react";
 import { X } from "lucide-react";
 import { nanoid } from "nanoid";
 
-import { UploadToIPFS } from "../../utils/UploadToIPFS";
+import { uploadToIPFS } from "../../utils/uploadToIPFS";
+// import { uploadToIPFS } from "@pinata/sdk";
 
 // wagmi hooks
 import { useWriteContract } from "wagmi";
@@ -84,7 +85,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
 
     try {
       // Upload to IPFS first
-      const ipfsHash = await UploadToIPFS(tipJarData);
+      const ipfsHash = await uploadToIPFS(tipJarData);
       setCid(ipfsHash);
       console.log("✅ Uploaded to IPFS with CID:", ipfsHash);
       toast.success("Uploaded to IPFS!");
