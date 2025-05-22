@@ -8,8 +8,17 @@ contract TipJarFactory {
     error InvalidSlug();
     error InvalidCID();
 
-    event TipJarCreated(address indexed owner, address tipJar, string slug, string cid);
-    event TipJarMetadataUpdated(string indexed slug, string oldCid, string newCid);
+    event TipJarCreated(
+        address indexed owner,
+        address tipJar,
+        string slug,
+        string cid
+    );
+    event TipJarMetadataUpdated(
+        string indexed slug,
+        string oldCid,
+        string newCid
+    );
 
     mapping(string => address) public slugsToTipJar;
     mapping(address => string) public tipJarToSlug;
@@ -26,9 +35,9 @@ contract TipJarFactory {
         // Basic slug validation - could be more comprehensive if needed
         for (uint256 i = 0; i < slugBytes.length; i++) {
             bytes1 char = slugBytes[i];
-            bool validChar = (char >= 0x30 && char <= 0x39) // 0-9
-                || (char >= 0x61 && char <= 0x7A) // a-z
-                || (char == 0x2D); // hyphen
+            bool validChar = (char >= 0x30 && char <= 0x39) || // 0-9
+                (char >= 0x61 && char <= 0x7A) || // a-z
+                (char == 0x2D); // hyphen
 
             if (!validChar) revert InvalidSlug();
         }
@@ -41,12 +50,10 @@ contract TipJarFactory {
         _;
     }
 
-    function createTipJar(string memory slug, string memory cid)
-        external
-        validSlug(slug)
-        validCID(cid)
-        returns (address)
-    {
+    function createTipJar(
+        string memory slug,
+        string memory cid
+    ) external validSlug(slug) validCID(cid) returns (address) {
         if (slugsToTipJar[slug] != address(0)) {
             revert SlugAlreadyExists(slug);
         }
@@ -67,7 +74,10 @@ contract TipJarFactory {
         return tipJarAddress;
     }
 
-    function updateTipJarMetadata(string memory slug, string memory newCid) external validCID(newCid) returns (bool) {
+    function updateTipJarMetadata(
+        string memory slug,
+        string memory newCid
+    ) external validCID(newCid) returns (bool) {
         address tipJarAddress = slugsToTipJar[slug];
         require(tipJarAddress != address(0), "TipJar not found");
 
@@ -85,19 +95,27 @@ contract TipJarFactory {
         return allTipJars;
     }
 
-    function getTipJarBySlug(string memory slug) external view returns (address) {
+    function getTipJarBySlug(
+        string memory slug
+    ) external view returns (address) {
         return slugsToTipJar[slug];
     }
 
-    function getCIDBySlug(string memory slug) external view returns (string memory) {
+    function getCIDBySlug(
+        string memory slug
+    ) external view returns (string memory) {
         return slugToCID[slug];
     }
 
-    function getCIDByAddress(address tipJar) external view returns (string memory) {
+    function getCIDByAddress(
+        address tipJar
+    ) external view returns (string memory) {
         return slugToCID[tipJarToSlug[tipJar]];
     }
 
-    function getTipJarsByOwner(address owner) external view returns (address[] memory) {
+    function getTipJarsByOwner(
+        address owner
+    ) external view returns (address[] memory) {
         return ownerTipJars[owner];
     }
 }

@@ -14,11 +14,12 @@
         "forge:copy-tipjar-factory-abi": "cp packages/backend/out/TipjarFactory.sol/TipjarFactory.json packages/frontend/src/artifacts/TipjarFactory.json",
         "forge:deploy": "cd packages/backend && forge script script/DeployTipjar.s.sol && cd ../.. && pnpm run forge:copy-contract && pnpm run forge:copy-tipjar-abi && pnpm run forge:copy-tipjar-factory-abi",
         "forge:node": "cd packages/backend && anvil && cd ../..",
-        "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path .prettierignore"
+        "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md,sol}\" --ignore-path .prettierignore"
     },
     "dependencies": {},
     "devDependencies": {
-        "prettier": "^3.2.5"
+        "prettier": "^3.2.5",
+        "prettier-plugin-solidity": "^1.1.3"
     },
     "packageManager": "pnpm@10.5.2"
 }

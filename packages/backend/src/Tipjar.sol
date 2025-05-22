@@ -49,7 +49,13 @@ contract TipJar is Ownable, ReentrancyGuard {
      */
     function _recordTip() private {
         // Record the tip
-        tips.push(Tip({sender: msg.sender, amount: msg.value, timestamp: block.timestamp}));
+        tips.push(
+            Tip({
+                sender: msg.sender,
+                amount: msg.value,
+                timestamp: block.timestamp
+            })
+        );
 
         // Update total tips received
         totalTips += msg.value;
@@ -67,7 +73,7 @@ contract TipJar is Ownable, ReentrancyGuard {
         require(amount <= address(this).balance, "Insufficient balance");
 
         // Transfer the specified amount to the owner
-        (bool success,) = payable(owner()).call{value: amount}("");
+        (bool success, ) = payable(owner()).call{value: amount}("");
         require(success, "Withdrawal failed");
 
         // Emit withdrawal event
@@ -82,7 +88,7 @@ contract TipJar is Ownable, ReentrancyGuard {
         require(balance > 0, "No funds to withdraw");
 
         // Transfer all funds to the owner
-        (bool success,) = payable(owner()).call{value: balance}("");
+        (bool success, ) = payable(owner()).call{value: balance}("");
         require(success, "Withdrawal failed");
 
         // Emit withdrawal event

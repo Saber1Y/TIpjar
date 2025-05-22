@@ -2,6 +2,7 @@
 packages/backend/out/
 packages/backend/cache/
 packages/backend/broadcast/
+packages/backend/lib
 
 # Next.js build output
 packages/frontend/.next/
@@ -14,3 +15,4 @@ docs/
 
 # Prettier config
 .prettierrc
+

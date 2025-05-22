@@ -1,43 +1,79 @@
-# new-tip-jar
+# New Tip Jar
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines , None, NONE, and more.
+A decentralized tipping platform built with Solidity, Next.js, and RainbowKit.
 
-## Features
+## Prerequisites
 
-- **TypeScript** - For type safety and improved developer experience
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Node.js** - Runtime environment
-- **Turborepo** - Optimized monorepo build system
+Before getting started, ensure you have the following installed:
 
-## Getting Started
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [pnpm](https://pnpm.io/) - Install with `npm install -g pnpm`
+- [Foundry](https://book.getfoundry.sh/getting-started/installation) - For Solidity development
+    ```bash
+    curl -L https://foundry.paradigm.xyz | bash
+    foundryup
+    ```
 
-First, install the dependencies:
+## Setup
 
-```bash
-pnpm install
-```
+1. Clone the repository and install dependencies:
 
-Then, run the development server:
+    ```bash
+    git clone <repository-url>
+    cd new-tip-jar
+    pnpm install
+    ```
 
-```bash
-pnpm dev
-```
-
-The API is running at [http://localhost:3000](http://localhost:3000).
-
-## Project Structure
-
-```
-new-tip-jar/
-├── apps/
-│   └── server/      # Backend API (None, NONE)
-```
+2. Set up environment variables:
+    - Copy `.env.example` to `.env` in the frontend package
+    - Fill in required variables:
+        - `NEXT_PUBLIC_RAINBOWKIT_CLIENT_ID` - From RainbowKit
+        - `THIRDWEB_CLIENT_ID` - From ThirdWeb
+        - `THIRDWEB_SECRET_KEY` - From ThirdWeb
 
 ## Available Scripts
 
-- `pnpm dev`: Start all applications in development mode
-- `pnpm build`: Build all applications
-- `pnpm dev:web`: Start only the web application
-- `pnpm dev:server`: Start only the server
-- `pnpm check-types`: Check TypeScript types across all apps
+### Frontend Development
+
+- `pnpm frontend:dev` - Start the Next.js development server
+- `pnpm frontend:check-types` - Run TypeScript type checking
+
+### Smart Contract Development
+
+- `pnpm forge:node` - Start a local Anvil blockchain node
+- `pnpm forge:build` - Compile smart contracts
+- `pnpm forge:deploy` - Deploy contracts and copy artifacts to frontend
+- `pnpm forge:copy-contract` - Copy contract artifacts to frontend
+- `pnpm forge:copy-tipjar-abi` - Copy Tipjar ABI to frontend
+- `pnpm forge:copy-tipjar-factory-abi` - Copy TipjarFactory ABI to frontend
+
+### Other
+
+- `pnpm format` - Format all files using Prettier
+
+## Development Workflow
+
+1. Start the local blockchain:
+
+    ```bash
+    pnpm forge:node
+    ```
+
+2. In a new terminal, deploy the contracts:
+
+    ```bash
+    pnpm forge:deploy
+    ```
+
+3. Start the frontend development server:
+
+    ```bash
+    pnpm frontend:dev
+    ```
+
+4. Visit `http://localhost:3000` to see the application
+
+## Project Structure
+
+- `packages/frontend` - Next.js frontend application
+- `packages/backend` - Solidity smart contracts

@@ -66,9 +66,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
 
                         <p className="text-sm text-gray-500">
                             <strong>TipJar Link:</strong>{" "}
-                            <span className="text-purple-600">
-                                {`/tipjar/${previewData.slug}`}
-                            </span>
+                            <span className="text-purple-600">{`/tipjar/${previewData.slug}`}</span>
                         </p>
 
                         {cid && (
