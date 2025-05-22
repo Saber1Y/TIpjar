@@ -8,6 +8,7 @@ packages/backend/lib
 packages/frontend/.next/
 packages/frontend/out/
 packages/frontend/build/
+packages/frontend/src/artifacts/
 
 # Node modules
 node_modules/
