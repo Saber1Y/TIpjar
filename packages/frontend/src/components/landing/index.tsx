@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAccount } from "wagmi";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { nanoid } from "nanoid";
 import { useWriteContract } from "wagmi";
 import { uploadMetadataToIPFS } from "@/utils/ipfs";
@@ -147,19 +147,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
     return (
         <div className="min-h-screen bg-white">
             <Navbar isConnected={isConnected} />
-            <ToastContainer />
-
+            {/* Hero Section */}
             <Hero onCreateClick={() => setIsOpen(true)} />
-
+            {/* Features Section */}
             <Features />
-
+            {/* CTA Section */}
             <CTA
                 isConnected={isConnected}
                 onCreateClick={() => setIsOpen(true)}
             />
-
+            {/* Stats Section */}
             <Stats />
-
+            {/* Create TipJar Modal */}
             <CreateTipJarModal
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
@@ -170,7 +169,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
                 onSubmit={handleSubmit}
                 isSubmitting={creatingTipjarStatus === "pending"}
             />
-
+            {/* Preview Modal */}
             <PreviewModal
                 isOpen={previewData !== null}
                 onClose={() => setPreviewData(null)}
