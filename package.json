@@ -1,0 +1,24 @@
+{
+    "name": "new-tip-jar",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "frontend:dev": "pnpm --filter frontend dev",
+        "frontend:check-types": "pnpm --filter frontend check-types",
+        "forge:build": "cd packages/backend && forge build && cd ../..",
+        "forge:copy-contract": "cp packages/backend/out/contract.json packages/frontend/src/artifacts/contract.json",
+        "forge:copy-tipjar-abi": "cp packages/backend/out/Tipjar.sol/Tipjar.json packages/frontend/src/artifacts/Tipjar.json",
+        "forge:copy-tipjar-factory-abi": "cp packages/backend/out/TipjarFactory.sol/TipjarFactory.json packages/frontend/src/artifacts/TipjarFactory.json",
+        "forge:deploy": "cd packages/backend && forge script script/DeployTipjar.s.sol && cd ../.. && pnpm run forge:copy-contract && pnpm run forge:copy-tipjar-abi && pnpm run forge:copy-tipjar-factory-abi",
+        "forge:node": "cd packages/backend && anvil && cd ../..",
+        "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path .prettierignore"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "prettier": "^3.2.5"
+    },
+    "packageManager": "pnpm@10.5.2"
+}

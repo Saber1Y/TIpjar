@@ -1,0 +1,16 @@
+# Foundry/Forge generated files
+packages/backend/out/
+packages/backend/cache/
+packages/backend/broadcast/
+
+# Next.js build output
+packages/frontend/.next/
+packages/frontend/out/
+packages/frontend/build/
+
+# Node modules
+node_modules/
+docs/
+
+# Prettier config
+.prettierrc
