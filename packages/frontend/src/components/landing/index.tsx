@@ -14,6 +14,7 @@ import { Stats } from "./stats";
 import { CTA } from "./cta";
 import { CreateTipJarModal } from "./create-tip-jar-modal";
 import { PreviewModal } from "./preview-modal";
+import { Navbar } from "../layout/navbar";
 
 interface LandingPageProps {
     ContractAddress: `0x${string}`;
@@ -145,6 +146,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ ContractAddress, abi }) => {
 
     return (
         <div className="min-h-screen bg-white">
+            <Navbar isConnected={isConnected} />
             <ToastContainer />
 
             <Hero onCreateClick={() => setIsOpen(true)} />

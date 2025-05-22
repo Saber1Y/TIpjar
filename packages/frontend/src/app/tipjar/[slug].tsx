@@ -1,8 +1,8 @@
 // app/tipjar/[slug]/page.tsx
-import TipJarPage from "@/components/tip-jar-page";
-import TipjarFactory from "@/abi/TipjarFactory.json";
-import Tipjar from "@/abi/Tipjar.json";
-import ContractInfo from "@/contract.json";
+import TipJarPage from "@/components/tip-jar";
+import TipjarFactory from "@/artifacts/TipjarFactory.json";
+import Tipjar from "@/artifacts/Tipjar.json";
+import ContractInfo from "@/artifacts/contract.json";
 
 export default function TipJarRoute({ params }: { params: { slug: string } }) {
     const abi = TipjarFactory.abi;
