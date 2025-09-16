@@ -1,0 +1,9 @@
+{
+  "factory_address": "0x49dcf820DA169d945128a90A19E24840F7172755",
+  "chain_id": 8453,
+  "network": "base-mainnet",
+  "timestamp": 1747738800,
+  "deployer": "0x11f7eaC93C9DD552DFD657BE52007A25E200f356",
+  "deployment_tx": "Check Basescan for transaction details",
+  "gas_cost": "~$1-2 USD in ETH"
+}

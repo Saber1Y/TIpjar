@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.30;
 
 import {TipJar} from "../src/Tipjar.sol";
 import {Script} from "forge-std/Script.sol";
